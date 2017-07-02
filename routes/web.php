@@ -33,3 +33,18 @@ Route::get('/home', function() {
 // redirect() 함수는 도우미함수 리디렉션 HTTP 응답을 반환한다
 
 
+// with() 메서드를 체인하여 데이터를 바인딩
+Route::get('/', function() {
+    return view('welcome')->with([
+        'name' => 'Foo',
+        'greeting' => '안녕하세요>',
+    ]);
+});
+
+// view() 의 두번째인자로 넘기는 방법
+Route::get('/', function() {
+    return view('welcome', [
+        'name' => 'Foo',
+        'greeting' => '안녕하세요>',
+    ]);
+});
