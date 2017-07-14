@@ -13,7 +13,15 @@ class ArticlesController extends Controller
      */
     public function index()
     {
-        return __METHOD__. '은(는) Ariticle 컬렉션을 조회합니다.';
+        // 지연로드 104p
+//        $articles = \App\Article::get();
+//        $articles->load('user');
+
+//        $articles = \App\Article::with('user')->get(); // 즉시 로드
+        // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
+        $articles = \App\Article::latest()->paginate(3);
+        
+        return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
     /**
