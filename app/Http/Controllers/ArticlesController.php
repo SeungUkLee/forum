@@ -20,7 +20,7 @@ class ArticlesController extends Controller
 //        $articles = \App\Article::with('user')->get(); // 즉시 로드
         // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
         $articles = \App\Article::latest()->paginate(3);
-        
+
         return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
@@ -31,7 +31,7 @@ class ArticlesController extends Controller
      */
     public function create()
     {
-        return __METHOD__. '은(는) Ariticle 컬렉션을 만들기 위한 폼을 담은 뷰를 반환합니다.';
+        return view('articles.create');
     }
 
     /**
@@ -40,9 +40,43 @@ class ArticlesController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
-        return __METHOD__. '은(는) 사용자의 입력한 폼 데이터로 새로운 Article 컬렉션을 반환합니다';
+//    public function store(Request $request)
+//    {
+//        $rules = [
+//            'title' => ['required'],
+//            'content' => ['required', 'min:10'],
+//        ];
+//
+//        $messages = [
+//            'title.required' => '제목은 필수 입력 항목입니다.',
+//            'content.required' => '본문은 필수 입력 항목입니다.',
+//            'content.min' => '본문은 최소 :min 글자 이상이 필요합니다.',
+//        ];
+//
+//
+////        $this->validate($request, $rules, $messages); // 13.2 트레이트 메서드 이용 114p
+//        $validator = \Validator::make($request->all(), $rules, $messages); // 13.1 유효성 검사 기본
+//
+//        if($validator->fails()) {
+//            return back()->withErrors($validator)->withInput();
+//        }
+//
+//        $article = \App\User::find(1)->articles()->create($request->all());
+//
+//        if(! $article) {
+//            return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
+//        }
+//
+//        return redirect(route('articles.index'))->with('flash_message', '작성하신 글이 저장되었습니다.');
+//    }
+    // 13.3 폼 리퀘스트 클래스 이용했을 경유 store 메서드
+    public function store(\App\Http\Requests\ArticlesRequest $request) {
+        $article = \App\User::find(1)->articles()->create($request->all());
+        if(! $article) {
+            return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
+        }
+
+        return redirect(route('articles.index'))->with('flash_message', '작성하신 글이 저장되었습니다.');
     }
 
     /**
