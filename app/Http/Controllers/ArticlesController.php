@@ -20,7 +20,7 @@ class ArticlesController extends Controller
 //        $articles = \App\Article::with('user')->get(); // 즉시 로드
         // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
         $articles = \App\Article::latest()->paginate(3);
-
+//        dd(view('articles.index', compact('articles'))->render());
         return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
@@ -96,7 +96,8 @@ class ArticlesController extends Controller
      */
     public function show($id)
     {
-        return __METHOD__. '은(는) 다음 기본 키를 가진 Ariticle 모델을 조회합니다.'. $id;
+        $article = \App\Article::findOrFail($id);
+        return $article->toArray();
     }
 
     /**
