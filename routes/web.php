@@ -89,3 +89,12 @@ Route::get('/home', 'HomeController@index');
 //DB::listen(function ($query) {
 //    var_dump($query->sql);
 //});
+
+//119p~120p
+// Event 파서드에 listen() 메서드로 이벤트 수신, 두번째 인수는 처리 로직인데 콜백으로 처리하였다. 콜백 안에서 수신한 이벤트 데이터에 접근할 수 있다.
+// 이벤트 리스너는 라라벨 부트스트랩 과정에서 컴퓨터 메모리에 적재되어 수신 대기 상태였다가 관심 있는 이벤트가 나타나는 순간 동작
+//Event::listen('article.created', function($article) {
+//    var_dump('이벤트를 받았습니다. 받은 데이터(상태)는 다음과 같습니다.');
+//    var_dump($article->toArray());
+//});
+// 라우팅 정의 파일에 이벤트 처리 로직을 모두 쓸 수 없다.-> app/Providers/EventServiceProvider.php 에 작성하자.

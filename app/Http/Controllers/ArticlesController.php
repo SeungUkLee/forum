@@ -76,7 +76,16 @@ class ArticlesController extends Controller
             return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
         }
 
+//        var_dump('이벤트를 던집니다');
+//        event(new \App\Events\ArticleCreated($article));
+//        event('article.created', [$article]);
+        // event() 함수는 이벤트를 방출한다. 1번째 인자는 이벤트이름, 2번째 인지는 이벤트 데이터
+//        var_dump('이벤트를 던졌습니다');
+
+        // 124p 실용적인 이벤트 시스템
+        event(new \App\Events\ArticlesEvent($article));
         return redirect(route('articles.index'))->with('flash_message', '작성하신 글이 저장되었습니다.');
+
     }
 
     /**
