@@ -98,3 +98,19 @@ Route::get('/home', 'HomeController@index');
 //    var_dump($article->toArray());
 //});
 // 라우팅 정의 파일에 이벤트 처리 로직을 모두 쓸 수 없다.-> app/Providers/EventServiceProvider.php 에 작성하자.
+
+//146p
+Route::get('mail', function() {
+    $article = App\Article::with('user')->find(1);
+
+    return Mail::send( // 클러저에서 보내는 $message변수는 뷰에 사용가능. 두번째 인자로 뷰에 바인딩할 데이터를 넘길때 $message변수를 사용하지 않도록 주의
+        ['text'=>'emails.articles.created-text'],
+        compact('article'),
+        function($message) use ($article) {
+//            $message->from('lsy931106@gmail.com');
+            $message->to('dltmddnr5@naver.com');
+            $message->subject('새 글이 등록되었습니다-'.$article->title);
+
+        }
+    );
+});

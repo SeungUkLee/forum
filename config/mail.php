@@ -113,4 +113,10 @@ return [
 
     'sendmail' => '/usr/sbin/sendmail -bs',
 
+    /* 테스트 (실제 외부 서비스를 통해 메일이 잘 전달되었는지 테스트) */
+    'to' => [
+        'address' => 'lsy931106@gmail.com',
+        'name' => 'Tester'
+    ],
+
 ];
