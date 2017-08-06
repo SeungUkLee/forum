@@ -114,3 +114,23 @@ Route::get('mail', function() {
         }
     );
 });
+
+Route::get('markdown', function() {
+    // 긴 문장을 편하게 쓰기 위해 HEREDOC 표기법 사용
+    $text =<<<EOT
+# 마크다운 예제 1
+
+이 문서는 [마크다운][1]으로 썼습니다 화면에는 HTML로 변환되어서 출력됩니다
+
+## 순서 없는 목록
+
+- 첫 번째 항목
+- 두 번째 항목[^1]
+
+[1]: http://daringfireball.net/projects/markdown
+
+[^1]: 두 번째 항목_ http://google.com
+EOT;
+    // app() 도우미 함수의 인자로 클래스를 넘긴다 -> 해당하는 클래스가 의존하는 하위 클래스까지 모두 주입된 인스턴스 반환
+    return app(ParsedownExtra::class)->text($text);
+});

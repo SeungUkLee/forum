@@ -97,7 +97,8 @@ class ArticlesController extends Controller
     public function show($id)
     {
         $article = \App\Article::findOrFail($id);
-        return $article->toArray();
+        debug($article->toArray());
+        return view('articles.show', compact('article'));
     }
 
     /**
