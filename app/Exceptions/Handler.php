@@ -51,12 +51,26 @@ class Handler extends ExceptionHandler
     {
         // .env 의 APP_ENV = production 으로 하드코드로 바꾸어야함
         if(app()->environment('production')) {
-            if($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-                return response(view('errors.notice', [
-                    'title' => '찾을 수 없습니다.',
-                    'description' => '죄송합니다 요청하신 페이지가 없습니다.'
-                ]));
+            $statusCode = 400;
+            $title = '죄송합니다. :(';
+            $description = '에러가 발생했습니다.';
+
+//            if($exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+//                return response(view('errors.notice', [
+//                    'title' => '찾을 수 없습니다.',
+//                    'description' => '죄송합니다 요청하신 페이지가 없습니다.'
+//                ]));
+//            }
+            if($exception instanceof \Symfony\Component\HttpKernel\Exception\NotFoundHttpException or
+                $exception instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
+                $statusCode = 404;
+                $description = $exception->getMessage() ? : '요청하신 페이지가 없습니다.';
             }
+
+            return response(view('errors.notice', [
+                'title' => $title,
+                'description' => $description,
+            ]), $statusCode);
         }
         return parent::render($request, $exception);
     }

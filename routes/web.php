@@ -115,22 +115,38 @@ Route::get('mail', function() {
     );
 });
 
-Route::get('markdown', function() {
-    // 긴 문장을 편하게 쓰기 위해 HEREDOC 표기법 사용
-    $text =<<<EOT
-# 마크다운 예제 1
+//Route::get('markdown', function() {
+//    // 긴 문장을 편하게 쓰기 위해 HEREDOC 표기법 사용
+//    $text =<<<EOT
+//# 마크다운 예제 1
+//
+//이 문서는 [마크다운][1]으로 썼습니다 화면에는 HTML로 변환되어서 출력됩니다
+//
+//## 순서 없는 목록
+//
+//- 첫 번째 항목
+//- 두 번째 항목[^1]
+//
+//[1]: http://daringfireball.net/projects/markdown
+//
+//[^1]: 두 번째 항목_ http://google.com
+//EOT;
+//    // app() 도우미 함수의 인자로 클래스를 넘긴다 -> 해당하는 클래스가 의존하는 하위 클래스까지 모두 주입된 인스턴스 반환
+//    return app(ParsedownExtra::class)->text($text);
+//});
 
-이 문서는 [마크다운][1]으로 썼습니다 화면에는 HTML로 변환되어서 출력됩니다
 
-## 순서 없는 목록
+//Route::get('docs/{file?}', function($file = null) {
+//    $text = (new App\Documentation)->get($file);
+//
+//    return app(ParsedownExtra::class)->text($text);
+//});
 
-- 첫 번째 항목
-- 두 번째 항목[^1]
+Route::get('docs/{file?}', 'DocsController@show');
 
-[1]: http://daringfireball.net/projects/markdown
-
-[^1]: 두 번째 항목_ http://google.com
-EOT;
-    // app() 도우미 함수의 인자로 클래스를 넘긴다 -> 해당하는 클래스가 의존하는 하위 클래스까지 모두 주입된 인스턴스 반환
-    return app(ParsedownExtra::class)->text($text);
-});
+// 현재 디렉터리를 기준으로 상대 경로를 사용, 이미지 URL은 /docs/images/foo-img-01.png다.
+// 이 요청을 받는 라우트를 선언
+Route::get('docs/images/{image}', 'DocsController@image')
+    ->where('image', '[\pL-\pN\._-]+-img-[0-9]{2}.png');
+// 정규표현식으로 {image} URL 파라미터의 모양을 한정.
+// 한 글자 이상의 문자, 숫자, 점, 밑줄, 대시로 시작, -img- 다음에 두자리 숫자, .png 로 끝나는 문자열만 유효한 URL 파라미터로 받는다.
