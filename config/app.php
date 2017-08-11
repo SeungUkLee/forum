@@ -184,6 +184,8 @@ return [
 
         //185p
         Intervention\Image\ImageServiceProvider::class,
+        //211p
+        Laracasts\Flash\FlashServiceProvider::class,
     ],
 
     /*
@@ -233,6 +235,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
         'Image' => Intervention\Image\Facades\Image::class,
+        'Flash' => Laracasts\Flash\Flash::class,
 
     ],
 

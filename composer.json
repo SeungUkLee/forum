@@ -10,6 +10,7 @@
         "erusev/parsedown-extra": " ~0.7.1",
         "guzzlehttp/guzzle": "~5.3|~6.0",
         "intervention/image": "2.3.*",
+        "laracasts/flash": " 2.0.*",
         "laravel/framework": "5.3.*"
     },
     "require-dev": {

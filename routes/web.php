@@ -83,7 +83,7 @@ Route::resource('articles', 'ArticlesController');
 //
 //    return '또 오세요~';
 //});
-Auth::routes();
+
 
 Route::get('/home', 'HomeController@index');
 //DB::listen(function ($query) {
@@ -99,7 +99,7 @@ Route::get('/home', 'HomeController@index');
 //});
 // 라우팅 정의 파일에 이벤트 처리 로직을 모두 쓸 수 없다.-> app/Providers/EventServiceProvider.php 에 작성하자.
 
-//146p
+//146p  //메일테스트
 Route::get('mail', function() {
     $article = App\Article::with('user')->find(1);
 
@@ -150,3 +150,63 @@ Route::get('docs/images/{image}', 'DocsController@image')
     ->where('image', '[\pL-\pN\._-]+-img-[0-9]{2}.png');
 // 정규표현식으로 {image} URL 파라미터의 모양을 한정.
 // 한 글자 이상의 문자, 숫자, 점, 밑줄, 대시로 시작, -img- 다음에 두자리 숫자, .png 로 끝나는 문자열만 유효한 URL 파라미터로 받는다.
+
+
+#####
+// 215p 라라벨 내장 인증 삭제
+//Auth::routes();
+
+/* 사용자 가입 */
+Route::get('auth/register', [
+    'as' => 'users.create',
+    'uses' => 'UsersController@create'
+]);
+
+Route::post('auth/register', [
+    'as' => 'users.store',
+    'uses' => 'UsersController@store'
+]);
+
+Route::get('auth/confirm/{code}', [
+    'as' => 'users.confirm',
+    'uses' => 'UsersController@confirm'
+])->where('code', '[\pL-\pN]{60}'); //221p
+
+
+/* 사용자 인증 */
+Route::get('auth/login', [
+    'as' => 'sessions.create',
+    'uses' => 'SessionsController@create'
+]);
+
+Route::post('auth/login', [
+    'as' => 'sessions.store',
+    'uses' => 'SessionsController@store'
+]);
+
+Route::get('auth/logout', [
+    'as' => 'sessions.destory',
+    'uses' => 'SessionsController@destroy'
+]);
+
+/*비밀번호 초기화*/
+Route::get('auth/remind', [
+   'as' => 'remind.create',
+    'uses' => 'PasswordsController@getRemind'
+]);
+
+Route::post('auth/remind',[
+    'as' => 'remind.store',
+    'uses' => 'PasswordsController@postRemind'
+]);
+
+Route::get('auth/reset/{token}', [
+    'as' => 'reset.create',
+    'uses' => 'PasswordsController@getReset'
+])->where('token', '[\pL-\pN]{64}');
+
+Route::post('auth/reset', [
+    'as' => 'reset.store',
+    'uses' => 'PasswordsController@postReset'
+]);
+
