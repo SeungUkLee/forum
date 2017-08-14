@@ -24,7 +24,7 @@ class ArticleCreated
     public function __construct(\App\Article $article)
     {
         //
-        $this->article =$article;
+        $this->article = $article;
     }
 
     /**

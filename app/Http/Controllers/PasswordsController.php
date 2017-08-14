@@ -6,6 +6,11 @@ use Illuminate\Http\Request;
 
 class PasswordsController extends Controller
 {
+    // 비밀번호 변경 로직
+    // 1. route('remind.create') (비밀번호 바꾸기 신청 폼)에서 사용자가 회원 가입할 때 사용했던 이메일 입력, 폼을 전송
+    // 2. 사용자 요청을 받아 토근 생성, 토큰과 결합한 비밀번호 바꾸기 요청 URL을 만들어 사용자에게 메일로 보냄
+    // 3. 사용자가 메일에 포함된 URL로 요청하면 비밀번호 바꾸기 폼을 제시. 사용자는 새로운 비밀번호를 입력하고 폼을 전송
+    // 4. 폼 요청을 받으면 토큰과 일치하는 사용자를 찾아 비밀번호를 업데이트 토큰 레코드는 삭제한다.
     public function __construct()
     {
         $this->middleware('guest');
@@ -56,7 +61,7 @@ class PasswordsController extends Controller
 
         $token = $request->get('token');
 
-        if(!\DB::table('password_resets')->whereToken($token)->first()) {
+        if(! \DB::table('password_resets')->whereToken($token)->first()) {
             flash('URL이 정확하지 않습니다.');
 
             return back()->withInput();

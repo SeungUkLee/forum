@@ -88,6 +88,11 @@ class Handler extends ExceptionHandler
             return response()->json(['error' => 'Unauthenticated.'], 401);
         }
 
-        return redirect()->guest('login');
+//        return redirect()->guest('login');
+        // 262p
+        // 로그인하지 않고 GET /articles/create 열어 보면 오류 발생
+        // -> auth 미들웨어가 리디렉션하는 GET /login 라우트가 없어서이다.
+        // 5.3 부터는 인증 예외를 전역 예외 처리기에서 소비하도록 바뀜.
+        return redirect()->guest(route('sessions.create'));
     }
 }

@@ -11,6 +11,12 @@ class ArticlesController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function __construct()
+    {
+        $this->middleware('auth', ['except' => ['index', 'show']]);
+    }
+
     public function index()
     {
         // 지연로드 104p
@@ -21,6 +27,8 @@ class ArticlesController extends Controller
         // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
         $articles = \App\Article::latest()->paginate(3);
 //        dd(view('articles.index', compact('articles'))->render());
+
+
         return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
@@ -31,7 +39,12 @@ class ArticlesController extends Controller
      */
     public function create()
     {
-        return view('articles.create');
+        // 265p Null object 패턴
+        // 글 작성과 수정 뷰가 폼을 공유하면서 old() 메서드의 두 번째 인자 때문에 널 포인터 오류가 발생
+        // null 객체를 주입하는 것을 null object 패턴이라고 한다. 글 작성 폼에 더미 $article 객체를 바인딩해서 오류를 피하도록 했다.
+        $article = new \App\Article;
+
+        return view('articles.create', compact('article'));
     }
 
     /**
@@ -71,7 +84,12 @@ class ArticlesController extends Controller
 //    }
     // 13.3 폼 리퀘스트 클래스 이용했을 경유 store 메서드
     public function store(\App\Http\Requests\ArticlesRequest $request) {
-        $article = \App\User::find(1)->articles()->create($request->all());
+//        $article = \App\User::find(1)->articles()->create($request->all());
+
+        // Illuminate\Http\Request $request 인스턴스는 로그인한 사용자 정보를 이미 가지고 있다.
+        // 뿐만 아니라 auth 미들웨어는 로그인하지 않은 사용자가 이 메서드에 들어오는 것을 막아주므로 널 포인터 예외로부터 안전하다.
+
+        $article = $request->user()->articles()->create($request->all());
         if(! $article) {
             return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
         }
@@ -84,6 +102,7 @@ class ArticlesController extends Controller
 
         // 124p 실용적인 이벤트 시스템
         event(new \App\Events\ArticlesEvent($article));
+
         return redirect(route('articles.index'))->with('flash_message', '작성하신 글이 저장되었습니다.');
 
     }
@@ -94,10 +113,12 @@ class ArticlesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+//    public function show($id)
+    public function show(\App\Article $article)
     {
-        $article = \App\Article::findOrFail($id);
-        debug($article->toArray());
+//         $article = \App\Article::findOrFail($id); // 라우트 모델 바인딩으로 인해 필요 없음 250p
+
+//        debug($article->toArray());
         return view('articles.show', compact('article'));
     }
 
@@ -107,9 +128,13 @@ class ArticlesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(\App\Article $article)
     {
-        return __METHOD__. '은(는) 다음 기본키를 가진 Article 모델을 수정하기 위한 폼을 담은 뷰를 반환합니다'. $id;
+        // 입력 값 유효성 검사 할 때 validate() 를 썻던것과 비슷
+        // authorize() 역시 부모 클래스가 가진 트레이트에서 찾을 수 있는데 이 메서드는 검사할 권한의 이름을 첫 번째 인자,
+        // 검사할 모델 인스턴스를 두 번째 인자로 받는다.
+        $this->authorize('update', $article);
+        return view('articles.edit', compact('article'));
     }
 
     /**
@@ -119,9 +144,12 @@ class ArticlesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(\App\Http\Requests\ArticlesRequest $request, \App\Article $article)
     {
-        return __METHOD__. '은(는) 사용자의 입력한 폼 데이터로 다음 기본 키를 가진 Article 모델을 수정합니다';
+        $article->update($request->all());
+        flash()->success('수정하신 내용을 저장했습니다.');
+
+        return redirect(route('articles.shohw', $article->id));
     }
 
     /**
@@ -130,8 +158,13 @@ class ArticlesController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(\App\Article $article)
     {
-        return __METHOD__. '은(는) 다음 기본키를 가진 Article 모델을 삭제합니다.';
+        $this->authorize('delete', $article);
+        $article->delete();
+
+        return response()->json([], 204);
+        // json() 메서드는 Content-type: application/json HTTP 응답 헤더를 붙이고
+        // 첫 번째 인자로 받은 배열을 JSON 형식을 직렬화한다,
     }
 }

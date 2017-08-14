@@ -26,6 +26,10 @@ class RouteServiceProvider extends ServiceProvider
         //
 
         parent::boot();
+        // 라우트 모델 바인딩 250p
+        // 라우트(URL) 파라미터 값에 해당하는 모델을 컨트롤러에서 바로 쓸 수 있는 기능
+        // 먼저 URL 파라미터와 모델을 연결해야 한다.
+        Route::model('article', \App\Article::class); // App\Article 모델에 {article} 파라미터를 연결하는 구문
     }
 
     /**
