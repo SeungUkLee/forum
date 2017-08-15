@@ -17,7 +17,7 @@ class ArticlesController extends Controller
         $this->middleware('auth', ['except' => ['index', 'show']]);
     }
 
-    public function index()
+    public function index($slug = null)
     {
         // 지연로드 104p
 //        $articles = \App\Article::get();
@@ -25,10 +25,12 @@ class ArticlesController extends Controller
 
 //        $articles = \App\Article::with('user')->get(); // 즉시 로드
         // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
-        $articles = \App\Article::latest()->paginate(3);
+//        $articles = \App\Article::latest()->paginate(3);
 //        dd(view('articles.index', compact('articles'))->render());
 
-
+        // $slug 변수 값이 있을 때 없을 때의 쿼리를 분리
+        $query = $slug ? \App\Tag::whereSlug($slug)->firstOrFail()->articles() : new \App\Article;
+        $articles = $query->latest()->paginate(3);
         return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
@@ -91,6 +93,7 @@ class ArticlesController extends Controller
 
         $article = $request->user()->articles()->create($request->all());
         if(! $article) {
+            $article->tags()->sync($request->input('tags')); // 폼 이름을 tags[]로 전송했으므로 $request->input('tags') 구문은 배열을 반환
             return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
         }
 
@@ -147,6 +150,7 @@ class ArticlesController extends Controller
     public function update(\App\Http\Requests\ArticlesRequest $request, \App\Article $article)
     {
         $article->update($request->all());
+        $article->tags()->sync($request->input('tags'));
         flash()->success('수정하신 내용을 저장했습니다.');
 
         return redirect(route('articles.shohw', $article->id));

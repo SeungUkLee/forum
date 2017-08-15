@@ -10,10 +10,51 @@
 
 @import "node_modules/font-awesome/scss/font-awesome";
 
+// select2 : 태그 선택 ui
+@import "node_modules/select2/src/scss/core";
+
 //test
 //body {
 //  background-color : #00FF00;
 //}
+
+
+// Sidebar
+.sidebar__article,
+.tags__article{
+  a {
+    color: $text-color;
+    text-decoration: none;
+  }
+}
+
+// Tags Line, Attachments Line
+.tags__article {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-weight: 100;
+  font-size: $font-size-base * 0.8;
+
+  li {
+    display: inline-block;
+  }
+
+  li:first-child {
+    margin-right: 10px;
+  }
+
+  li:not(:first-child) {
+    padding: 4px 8px;
+    background-color: darken($body-bg, 5%);
+    border-radius: 3px;
+
+    &:hover {
+      background-color: darken($body-bg, 10%);
+    }
+  }
+}
+
 
 .docs__sidebar {
   margin-top: 20px;

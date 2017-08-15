@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         // $this->call(UsersTableSeeder::class);
+
         if(config('database.default') !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=0');
         }
@@ -25,8 +26,47 @@ class DatabaseSeeder extends Seeder
         App\Article::truncate();
         $this->call(ArticlesTableSeeder::class);
 
+
+        // 268p
+        /* 태그 */
+
+        App\Tag::truncate();
+        DB::table('article_tag')->truncate();
+        $tags = config('project.tags');
+
+        foreach ($tags as $slug => $name) {
+            App\Tag::create([
+                'name' => $name,
+                'slug' => str_slug($slug)
+            ]);
+        }
+        // $this->comman는 부모 클래스의 프로퍼티로서 \Illuminate\Console\Command 인스턴스다.
+        // info() 메서드는 콘솔에 초록색 메시지를 출력해준다 (line(), ask() 등 다양한 메서드 존재)
+        $this->command->info('Seeded: tags table');
+
+        /* 변수 선언 */
+        // 시더 클래스를 나누어 놓으면 오히려 중복이 더 발생하는 경우가 있다.
+        // 그렇기 때문에 이렇게 따로 시딩 로직에서 쓰기 위한 변수들을 선언
+        $faker = app(Faker\Generator::class); // 모델 팩토리에 사용했던 가짜 데이터를 만드는데 사용 (app() 도우미 함수로 $faker 인스턴스 생성)
+        $users = App\User::all();
+        $articles = App\Article::all();
+        $tags = App\Tag::all();
+
+        /* 아티클 및 태그 연결 */
+        foreach ($articles as $article) {
+            $article->tags()->sync(
+                $faker->randomElements( // randomElements(array $array, int $count=1) 메서드는 $array 배열에서 $count 로 지정한 만큼의 원소를 랜덤하게 반환
+                    $tags->pluck('id')->toArray(), // 태그 아이디로만 구성된 배열 반환
+                    rand(1, 3) // 1~3 랜덤 정수 반환
+                )
+            );
+        }
+
+        $this->command->info('Seeded: article_tag table');
+
         if(config('database.default') !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
+
     }
 }

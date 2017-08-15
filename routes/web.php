@@ -210,3 +210,9 @@ Route::post('auth/reset', [
     'uses' => 'PasswordsController@postReset'
 ]);
 
+// 태그에 속하는 글 목록 필터링 하기 위해.
+// GET /tags/laravel/articles -> laravel 태그에 속하는 글
+Route::get('tags/{slug}/articles', [
+    'as' => 'tags.articles.index',
+    'uses' => 'ArticlesController@index'
+]);
