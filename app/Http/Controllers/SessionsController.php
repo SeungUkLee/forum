@@ -29,11 +29,11 @@ class SessionsController extends Controller
 
         if(!auth()->user()->activated) {
             auth()->logout();
-            flash('가입 확인해 주십시오.');
+            flash()->warning('가입 확인해 주십시오.');
+            return redirect('/');
         }
 
         flash(auth()->user()->name . '님 환영합니다.');
-
         return redirect()->intended('home');
         // auth 미들웨어가 작동해서 로그인 페이지로 들어왔을 때 intended 메서드로 사용자가 원래 접근하려고 했던 URL로 리다이렉션 해준다.
     }

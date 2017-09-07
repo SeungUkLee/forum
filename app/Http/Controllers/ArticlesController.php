@@ -105,8 +105,9 @@ class ArticlesController extends Controller
 
         // 124p 실용적인 이벤트 시스템
         event(new \App\Events\ArticlesEvent($article));
+        flash()->success('글이 저장되었습니다.');
 
-        return redirect(route('articles.index'))->with('flash_message', '작성하신 글이 저장되었습니다.');
+        return redirect(route('articles.index'));
 
     }
 
