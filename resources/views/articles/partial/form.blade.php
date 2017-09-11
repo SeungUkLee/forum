@@ -37,6 +37,20 @@
     {{--</div>--}}
 </div>
 
+{{--<div class="form-group {{ $errors->has('file') ? 'has-error' : ''}} ">--}}
+    {{--<label for="files">파일 </label>--}}
+    {{--여러개의 파일을 한 번에 업로드 하기 위해 name=files[] 와 같이 배열형 필드 사용--}}
+    {{--<input type="file" name="files[]" id="files" class="form-control" multiple="multiple"/>--}}
+    {{--{!! $errors->first('files.0', '<span class="form-error">:message</span>') !!}--}}
+    {{--라라벨 측에서 유효성 검사할 때 배열형 필드에서 에러가 발생하면 에러를 files.0 files.1 처럼 반환한다.--}}
+{{--</div>--}}
+
+{{--드랍존 라이브러리로 비동기식으로 하기 때문에 위의 UI 는 주석--}}
+<div class="form-group">
+    <label for="my-dropzone"> 파일 </label>
+    <div id="my-dropzone" class="dropzone"></div>
+</div>
+
 @section('script')
     {{-- 부모 뷰의 스크립트 섹션을 덮어쓰기 않기 위해 @parent 키워드 사용--}}
     @parent
@@ -45,5 +59,38 @@
             placeholder:'태그를 선택하세요(최대 3개)',
             maximumSelectionLength:3
         });
+
+        /* dropzone */
+        Dropzone.autoDiscover = false;
+        var myDropzone = new Dropzone('div#my-dropzone', {
+            url: '/attachments',
+            paramName: 'files',
+            maxFilesize: 3,
+            acceptedFiles: '.jpg, .png, .zip, .tar',
+            uploadMultiple: true,
+            // 파일 업로드 요청을 할 때 같이 보낼 데이터, _token은 CSRF 토큰. article_id 는현재 파일 업로드 요청이 어떤 폼에서 왔는지 구분
+            // 수정 폼이면 기존 아티클에 첨부 파일을 연결하기 위해 사용.
+            params: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                article_id: '{{$article->id}}'
+            },
+            dictDefaultMessage: '<div class="text-center text-muted">' +
+                    '<h2> 첨부할 파일을 끌어다 놓으세요</h2>' +
+                    '<p> (또는 클릭하셔도 됩니다.) </p> </div>',
+            dictFileTooBig: '파일당 최대 크기는 3MB입니다.',
+            dictInvalidFileType: 'jpg, png, zip, tar 파일만 가능합니다.'
+        });
+
+        var form = $('form').first();
+
+        myDropzone.on('successmultiple', function(file, data) {
+            for(var i=0, len=data.length; i<len; i++) {
+                $("<input>", {
+                    type: "hidden",
+                    name: "attachments[]",
+                    value: data[i].id
+                }).appendTo(form);
+            }
+        })
     </script>
 @stop

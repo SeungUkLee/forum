@@ -18,4 +18,12 @@
         @endif
 
     </div>
+
+
+    {{--태그와는 반대로 글 상세 보기일 때만 첨부 파일 목록을 보여준다.--}}
+    {{--첨부 파일 목록을 아티클 조각 뷰에 넣었는데 구조와 위치를 자유롭게 적용해도 무관--}}
+    @if ($viewName === 'articles.show')
+        @include('attachments.partial.list', ['attachments' => $article->attachments])
+    @endif
+
 </div>

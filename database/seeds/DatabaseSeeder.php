@@ -64,9 +64,35 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Seeded: article_tag table');
 
+
+        /* 27.3 이미지 업로드 291p */
+        App\Attachment::truncate();
+        if(! File::isDirectory(attachments_path())) {
+            File::makeDirectory(attachments_path(), 775, true);
+        }
+        File::cleanDirectory(attachments_path());
+
         if(config('database.default') !== 'sqlite') {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
         }
+
+        // public/files/.gitignore 파일이 있어야 커밋할 때 빈 디렉터리를 유지할 수 있다.
+        File::put(attachments_path('.gitignore'), "*\n!.gitignore");
+        $this->command->error( // 시간이 오래 걸리는 작업을 시각적으로 표현하기 위해 실제 동작과 다르지만 error 메서드를 이용하여 메세지 출력
+            'Downloading ' . $articles->count() . ' images from lorempixel. It takes time...'
+        );
+        $articles->each(function ($article) use ($faker) {
+            $path = $faker->image(attachments_path());
+            $filename = File::basename($path);
+            $bytes = File::size($path);
+            $mime = File::mimeType($path);
+            $this->command->warn("File saved: {$filename}");
+            $article->attachments()->save(
+                factory(App\Attachment::class)->make(compact('filename', 'bytes', 'mime'))
+            );
+        });
+
+        $this->command->info('Seeded: attachments table and files');
 
     }
 }

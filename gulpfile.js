@@ -22,7 +22,8 @@ elixir((mix) => {
     mix.scripts([
         '../../../node_modules/highlightjs/highlight.pack.js',
         '../../../public/js/app.js',
-        '../../../node_modules/select2/dist/js/select2.js'
+        '../../../node_modules/select2/dist/js/select2.js',
+        '../../../node_modules/dropzone/dist/dropzone.js'
     ], 'public/js/app.js');
 
     mix.version([

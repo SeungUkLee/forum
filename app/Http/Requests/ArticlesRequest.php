@@ -12,6 +12,15 @@ class ArticlesRequest extends FormRequest
      *
      * @return bool
      */
+
+    // 라라벨은 리디렉션이 발생할 때마다 세션에 여러 가지 정보를 저장한다.
+    // 유효성 검사 오류 있을 때도 리디렉션이 발생하며 폼에 입력 값을 돌려주기 위해 세션을 이용한다.
+    // 파일을 원소로 가지는 배열은 세션에 저장할 때 예외가 발생할 가능성이 크다
+    // $dontFlash 프로퍼티는 유효성 검사에서 세션 저장을 하지 않을 필드를 정의한다.
+    // 로그인 폼에서 비밀번호의 입력 값 유지가 되지 않는 것은 바로 이 프로퍼티 덕분이다.
+    protected $dontFlash = ['files'];
+
+
     public function authorize()
     {
         return true;
@@ -28,6 +37,9 @@ class ArticlesRequest extends FormRequest
             'title' => ['required'],
             'content' => ['required' , 'min:10'],
             'tags' => ['required', 'array'], // tags => 'required|array' 와 같다.
+            'files' => ['array'],
+            'files.*' => ['mimes:jpg,png,zip,tar', 'max:300000'], // 폼을 배열로 전송한거, mimes 는 파일 형식을 검사 max 단위는 KB
+            // 참고로 files.* 는 라라벨 5.2 부터 스는 배열 유효성 검사 문법
         ];
     }
 
