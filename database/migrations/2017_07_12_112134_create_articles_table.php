@@ -22,7 +22,7 @@ class CreateArticlesTable extends Migration
 
             $table->timestamps();
 
-            //foreign 테이블끼리 외래 키 관계를 연결
+            // foreign: 테이블끼리 외래 키 관계를 연결
             // articles.user_id 열은 users.id 열을 참조한다는 의미.
             // onUpdate('cascade'), onDelete('cascade') 는 users.id 열이 변경되거나 삭제될때의 동작옵션을 정의
             $table->foreign('user_id')->references('id')->on('users')

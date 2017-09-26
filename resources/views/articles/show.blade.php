@@ -34,16 +34,20 @@
         </a>
     </div>
 
+    <div class="container__comment">
+        @include('comments.index')
+    </div>
+
 @stop
 
 @section('script')
     <script>
 //        마스터 레이아웃을 만들 때 HTML 헤더 영역에 CSRF 토큰을 넣어 두었는데 그 값을 읽어서 모든 ajax 요청 헤더에 붙이는 구문
-        $.ajaxSetup({
-            headers: {
-                'X-CSRF-TOKEN' : $('meta[name="csrf-token"]'.attr('content'))
-            }
-        });
+//        $.ajaxSetup({
+//            headers: {
+//                'X-CSRF-TOKEN' : $('meta[name="csrf-token"]'.attr('content'))
+//            }
+//        });
 
         $('.button__delete').on('click', function(e) {
             var articleId = $('article').data('id');

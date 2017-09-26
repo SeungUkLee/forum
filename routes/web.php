@@ -220,3 +220,18 @@ Route::get('tags/{slug}/articles', [
 // 파일 업로드를 비동기로 동작하기 때문에 글 저장 요청에 쓰던 POST /articles 경로를 계속 쓸 수는 없다
 // 드롭존 라이브러리의 파일 업로드 요청을 받을 별도의 라우트를 만든다.
 Route::resource('attachments', 'AttachmentsController', ['only' => ['store', 'destroy']]);
+
+// 305p
+Route::resource('comments', 'CommentsController', ['only' => ['update', 'destory']]);
+Route::resource('articles.comments', 'CommentsController', ['only'=>'store']);
+// Restful 리소스 컨트롤러를 만들때 (.)점을 이용하면 중첣 라우트를 만들수 있다.
+// 이 라우팅은 /articles/{article}/comments URL을 만든다. 그리고 store() 메서드만 쓴다고 선언
+// 중첩 라우팅을 쓰면 우리가 만든 모델 간 관계를 이용해서 App\Article::comments()->create()와 같이 댓글 모델을 쉽게 만들 수 있다.
+// 댓글 수정이나 삭제할때는 Article 모델과의 관계를 굳이 이용할 필요가 없다. 그래서 /comments/{comment} 와 같은 URL을 만듬.
+
+// 314p // UI 
+// 314p // UI에서 전송한 사용자의 투포를 저장하는 메서드 하나만 필요 -> CommentController에서 쓰고 새로 컨트롤러 생성 x
+Route::post('comments/{comment}/votes', [
+    'as'=>'comments.vote',
+    'uses' => 'CommentsController@vote'
+]);

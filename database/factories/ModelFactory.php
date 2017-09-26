@@ -41,3 +41,34 @@ $factory->define(App\Attachment::class, function (Faker\Generator $faker) {
         'filename' => sprintf("%s %s", str_random(), $faker->randomElement(['jpg','png','zip','tar']))
     ];
 });
+
+$factory->define(App\Comment::class, function (Faker\Generator $faker) {
+    $articleIds = App\Article::pluck('id')->toArray(); // pluck 메서드는 지정된 키의 값을 검사한다.
+    $userIds = App\User::pluck('id')->toArray();
+
+    return [
+        'content' => $faker->paragraph,
+        'commentable_type' => function () use ($faker, $articleIds) {
+            return $faker->randomElement($articleIds);
+        },
+        'user_id' => function () use ($faker, $userIds) {
+            return $faker->randomElement($userIds);
+        },
+    ];
+});
+
+$factory->define(App\Vote::class, function (Faker\Generator $faker) {
+    $up = $faker->randomElement([true, false]);
+    $down = !$up;
+    // votes 테이블의 레코드 하나는 투표 한번을 의미 즉 votes.up 열과 votes.down 열 중 하나만 1 값을 가질 수 있다.
+    $userIds = App\User::pluck('id')->toArray();
+
+    return [
+        'up' => $up ? 1 : null,
+        'down' => $down ? 1 : null,
+        'user_id' => function () use ($faker, $userIds) {
+            return $faker->randomElement($userIds);
+        }
+    ];
+
+});

@@ -25,4 +25,9 @@ class Article extends Model
     public function attachments() {
         return $this->hasMany(Attachment::class);
     }
+
+    public function comments() {
+        // comments 테이블엔 일대다 또는 일대일 관계처럼 article_id 열이 없다. 다형적 관계에서는 hasMany() 대신 morphMany() 메서드 이용
+        return $this->morphMany(Comment::class, 'commentable');
+    }
 }

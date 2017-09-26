@@ -25,9 +25,12 @@ class User extends Authenticatable
      *
      * @var array
      */
+    // hidden 프로퍼티는 $visible 의 반대다 toArray() 또는 toJson() 으로 출력할 프로퍼티를
+    // 블랙리스트 또는 화이트리스트 방식으로 제어한다.
     protected $hidden = [
-        'password', 'remember_token', 'confirm_code'
+        'password', 'confirm_code'
     ];
+
 
     // SQLite 는 TINYINT 값이 문장열로 저장되는데
     // 엘로퀀드에서 읽을 떄 string 으로 반환하기 때문에 비교연산에서 예상치 못한 결과가 발생 할 수도 있다.
@@ -38,6 +41,14 @@ class User extends Authenticatable
 
     public function articles() {
         return $this->hasMany(Article::class);
+    }
+
+    public function comments() {
+        return $this->hasMany(Comment::class);
+    }
+
+    public function votes() {
+        return $this->hasMany(Vote::class);
     }
 
     /* helpers */

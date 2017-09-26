@@ -149,7 +149,10 @@ class ArticlesController extends Controller
 //         $article = \App\Article::findOrFail($id); // 라우트 모델 바인딩으로 인해 필요 없음 250p
 
 //        debug($article->toArray());
-        return view('articles.show', compact('article'));
+
+        // 댓글 목록 요청 처리 (306p)
+        $comments = $article->comments()->with('replies')->whereNull('parent_id')->latest()->get();
+        return view('articles.show', compact('article', 'comments'));
     }
 
     /**

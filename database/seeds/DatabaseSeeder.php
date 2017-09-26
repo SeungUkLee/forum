@@ -72,9 +72,6 @@ class DatabaseSeeder extends Seeder
         }
         File::cleanDirectory(attachments_path());
 
-        if(config('database.default') !== 'sqlite') {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
-        }
 
         // public/files/.gitignore 파일이 있어야 커밋할 때 빈 디렉터리를 유지할 수 있다.
         File::put(attachments_path('.gitignore'), "*\n!.gitignore");
@@ -93,6 +90,41 @@ class DatabaseSeeder extends Seeder
         });
 
         $this->command->info('Seeded: attachments table and files');
+
+        /* 최상위 댓글 */
+        $article->each(function ($article) {
+            $article->comments()->save(factory(App\Comment::class)->make());
+            $article->comments()->save(factory(App\Comment::class)->make());
+        });
+        /* 자식 댓글 */
+        $articles->each(function ($article) use ($faker) {
+            $commentIds = App\Comment::pluck('id')->toArray();
+            // 반복문을 쉰회할 때마다 자식 댓글이 생성
+            foreach (range(1, 5) as $index) {
+                $article->comments()->save(
+                    factory(App\Comment::class)->make([
+                        'parent_id' => $faker->randomElement($commentIds),
+                    ])
+                );
+            }
+        });
+
+        $this->command->info('Seeded: comments table');
+
+
+        $comments = App\Comment::all();
+
+        $comments->each(function ($comment) {
+            $comment->votes()->save(factory(App\Vote::class)->make());
+            $comment->votes()->save(factory(App\Vote::class)->make());
+            $comment->votes()->save(factory(App\Vote::class)->make());
+        });
+
+        $this->command->info('Seeded: votes table');
+
+        if(config('database.default') !== 'sqlite') {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+        }
 
     }
 }
