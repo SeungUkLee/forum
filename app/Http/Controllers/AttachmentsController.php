@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AttachmentsController extends Controller
 {
     public function store(Request $request) {
+        Log::info('$request : '.$request);
+        Log::info('Request has File : '.$request->hasFile('files'));
+        Log::info('Request article id : '.$request->input('article_id'));
         $attachments = [];
 
         // ArticlesController 에 있던 파일 업로드 요청 처리 로직을 별도의 컨트롤러로 옮김 -> 이유는 287p
@@ -39,7 +43,7 @@ class AttachmentsController extends Controller
                 // articles_id 가 있고 없고의 로직을 분기
                 // 있으면 글 수정 폼에서 보낸 요청이다. -> Article 모델과의 관계를 이용해서 메타 데이터 저장
                 // 필드가 없으면 글 쓰기 폼에서 보낸 요청 -> Attachments 모델과의 관계를 이용해서 메타 데이터 저장
-                $attachments[] = ($id = $request->input('articles_id'))
+                $attachments[] = ($id = $request->input('article_id'))
                     ? \App\Article::findOrFail($id)->attachments()->create($payload)
                     : \App\Attachment::create($payload);
             }

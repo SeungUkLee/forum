@@ -87,28 +87,28 @@ class ArticlesController extends Controller
     // 13.3 폼 리퀘스트 클래스 이용했을 경유 store 메서드
     public function store(\App\Http\Requests\ArticlesRequest $request) {
         // ---- file upload 281p ----//
-        if($request->hasFile('files')) { // hasFile() 메서드로 files 필드 확인
-            $files = $request->file('files'); // file() 메서드는 폼 필드로 넘어온 배열 형태의 파일 목록 조회
-
-            foreach($files as $file) {
-                // 같은 파일을 두 번 업로듣할 수 있다. 파일 간의 이름 충돌을 피하기 위해 앞에 랜덤 문자를 붙였다.
-                // FILTER_SANITIZE_URL 필터를 사용하면, URL로 접근할때 안전하지 않은 문자는 필터링할 수 있다.
-                // UploadFile 인스턴스의 getClientOriginalName() 메서드는 임시 파일의 이름이 아니라 사용자가 업로드한 원래 파일 이름을 반환
-                // getClientSize() 도 같은 맥락
-                $filename = str_random().filter_var($file->getClientOriginalName(), FILTER_SANITIZE_URL);
-                $file->move(attachments_path(), $filename); // 파일을 원하는 위치로 옮기는 구문
-
-                $article->attachments()->create([
-                    'filename' => $filename,
-                    'bytes' => $file->getSize(),
-                    'mime' => $file->getClientMimeType()
-                    // 의사 결정이 필요한 부분
-                    // 파일을 저장할 때 파일 크기와 마임 타입을 테이블에 미리 써놓을 것이냐 ?
-                    // vs 모델을 조회할 때 파일시스템을 읽어서 크기와 마임 타입을 판단하고 반환할 것이냐?
-                    // 쓰기는 한 번이지만 읽기는 여러 번 발생 -> 따라서 먼저 써 놓는 것이 좀 더 현명하다.
-                ]);
-            }
-        }
+//        if($request->hasFile('files')) { // hasFile() 메서드로 files 필드 확인
+//            $files = $request->file('files'); // file() 메서드는 폼 필드로 넘어온 배열 형태의 파일 목록 조회
+//
+//            foreach($files as $file) {
+//                // 같은 파일을 두 번 업로듣할 수 있다. 파일 간의 이름 충돌을 피하기 위해 앞에 랜덤 문자를 붙였다.
+//                // FILTER_SANITIZE_URL 필터를 사용하면, URL로 접근할때 안전하지 않은 문자는 필터링할 수 있다.
+//                // UploadFile 인스턴스의 getClientOriginalName() 메서드는 임시 파일의 이름이 아니라 사용자가 업로드한 원래 파일 이름을 반환
+//                // getClientSize() 도 같은 맥락
+//                $filename = str_random().filter_var($file->getClientOriginalName(), FILTER_SANITIZE_URL);
+//                $file->move(attachments_path(), $filename); // 파일을 원하는 위치로 옮기는 구문
+//
+//                $article->attachments()->create([
+//                    'filename' => $filename,
+//                    'bytes' => $file->getSize(),
+//                    'mime' => $file->getClientMimeType()
+//                    // 의사 결정이 필요한 부분
+//                    // 파일을 저장할 때 파일 크기와 마임 타입을 테이블에 미리 써놓을 것이냐 ?
+//                    // vs 모델을 조회할 때 파일시스템을 읽어서 크기와 마임 타입을 판단하고 반환할 것이냐?
+//                    // 쓰기는 한 번이지만 읽기는 여러 번 발생 -> 따라서 먼저 써 놓는 것이 좀 더 현명하다.
+//                ]);
+//            }
+//        }
 
 
         // -------
@@ -119,10 +119,17 @@ class ArticlesController extends Controller
 
         $article = $request->user()->articles()->create($request->all());
         if(! $article) {
-            $article->tags()->sync($request->input('tags')); // 폼 이름을 tags[]로 전송했으므로 $request->input('tags') 구문은 배열을 반환
+
             return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
         }
+        // 태그 싱크
+        $article->tags()->sync($request->input('tags')); // 폼 이름을 tags[]로 전송했으므로 $request->input('tags') 구문은 배열을 반환
 
+        // 첨부파일 연결
+        $request->getAttachments()->each(function ($attachment) use ($article) {
+            $attachment->article()->associate($article);
+            $attachment->save();
+        });
 //        var_dump('이벤트를 던집니다');
 //        event(new \App\Events\ArticleCreated($article));
 //        event('article.created', [$article]);

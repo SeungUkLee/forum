@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Attachment;
 use Illuminate\Foundation\Http\FormRequest;
 
 // 13.3 폼 리퀘스트 클래스 이용 115p
@@ -57,5 +58,18 @@ class ArticlesRequest extends FormRequest
             'title' => '제목',
             'content' => '본문',
         ];
+    }
+
+    /**
+     * 사용자 입력 값으로부터 첨부파일 객체를 조회합니다.
+     *
+     * @return Collection
+     */
+    public function getAttachments()
+    {
+        return Attachment::whereIn(
+            'id',
+            $this->input('attachments', [])
+        )->get();
     }
 }

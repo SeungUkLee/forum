@@ -33,7 +33,9 @@ class AuthServiceProvider extends ServiceProvider
         // 우리 예제는 지금 로그인한 사용자가 최고 관리자가 아닐 경우에만 다음 권한 검사 로직을 타게 된다.
         // git 예제랑 소스코드가 조금 다름....
         Gate::before(function ($user) {
-            return $user->isAdmin();
+//            return $user->isAdmin();
+            if($user->isAdmin()) return true;
+            // return false 가 되버리면 update , delete Gate 를 확인하지않더라.
         });
 
 //        261p
@@ -46,9 +48,5 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('delete', function($user, $model) {
             return $user->id === $model->user_id;
         });
-
-
-
-
     }
 }

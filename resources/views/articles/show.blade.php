@@ -18,6 +18,7 @@
 
     <div class="text-center action__article">
         @can('update', $article)
+
             <a href="{{ route('articles.edit', $article->id) }}" class="btn btn-info">
                 <i class="fa fa-pencil"></i> 글 수정
             </a>
