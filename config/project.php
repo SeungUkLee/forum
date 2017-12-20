@@ -6,6 +6,7 @@
  * Time: 오후 8:14
  */
 
+// 프로젝트 전역 설정
 return [
     'name' => 'My Application',
     'url' => 'http://myapp.dev:8000',
@@ -16,5 +17,10 @@ return [
         'general' => '자유의견',
         'server' => '서버',
         'tip' => '팁'
-    ]
+    ],
+    'sorting' => [
+        'view_count' => '조회수',
+        'created_at' => '작성일',
+    ],
+    'cache' => true,
 ];

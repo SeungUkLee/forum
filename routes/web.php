@@ -235,3 +235,7 @@ Route::post('comments/{comment}/votes', [
     'as'=>'comments.vote',
     'uses' => 'CommentsController@vote'
 ]);
+
+Route::get('test', function () {
+    phpinfo();
+});

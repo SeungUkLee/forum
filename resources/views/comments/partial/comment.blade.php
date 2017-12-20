@@ -1,9 +1,9 @@
 @php
-    $voted = null;
-    if ($currentUser) {
-        $voted = $comment->votes->contains('user_id', $currentUser->id)
-            ? 'disabled="disabled"' : null;
-    }
+  $voted = null;
+  if ($currentUser) {
+    $voted = $comment->votes->contains('user_id', $currentUser->id)
+      ? 'disabled="disabled"' : null;
+  }
 @endphp
 {{--forelse로 반복하면서 댓글 컬렉션의 내용을 이 조각 뷰에 하나씩 렌더링하기 때문에 $voted 변수를 컨트롤러에서 받을 수 없다.--}}
 {{--$currentUser->id가 로그인한 사용자 객체의 프로퍼티에 접근하기 때문에 조건문으로 사용자 로그인 테스트를 먼저 실시--}}
@@ -17,59 +17,131 @@
 {{-- 최상위 댓글, 자식이나 손자 등도 모두 이 조각 뷰를 사용--}}
 {{-- {{isReply ...}} : 댓글 스레드 간에 구분을 위해 박스를 표시 할 때 사용할 css 클래스를 동적으로 생성하는 구문--}}
 {{-- data-id : 자바스크립트로 댓글을 삭제할 때 유용, 서버에서 요청을 처리하고 글 상세 보기로 돌아올때 id 속성의 도움을 받아 방금 처리한 댓글로 이동--}}
-<div class="media item__comment {{ $isReply ? 'sub' : 'top' }}" data-id="{{ $comment->id }}" id="comment_{{ $comment->id }}">
+
+
+@if ($isTrashed and ! $hasChild)
+  {{--삭제된 댓글이면서 자식 댓글이 없다 -> 아무것도 출력 x--}}
+@elseif ($isTrashed and $hasChild)
+  {{--삭제된 댓글이지만 자식 댓글이 있다 -> 삭제되었습니다 라고 알리고 자식 댓글을 출력--}}
+
+  <div class="media item__comment {{ $isReply ? 'sub' : 'top' }}" data-id= "{{ $comment->id }}" id="comment_{{ $comment->id }}">
     @include('users.partial.avatar', ['user' => $comment->user, 'size' => 32])
 
     <div class="media-body">
-        <h5 class="media-heading">
-            <a href="{{ gravatar_profile_url($comment->user->email) }}">
-                {{ $comment->user->name }}
-            </a>
-            <small>
-                {{ $comment->created_at->diffForHumans() }}
-            </small>
-        </h5>
+      <h5 class="media-heading">
+        <a href="{{ gravatar_profile_url($comment->user->email) }}">
+          {{ $comment->user->name }}
+        </a>
+        <small>
+          {{ $comment->created_at->diffForHumans() }}
+        </small>
+      </h5>
 
-        <div class="content__comment">
-            {!! markdown($comment->content) !!}
-        </div>
+      <div class="text-danger content__comment">
+        삭제된 댓글입니다.
+      </div>
 
-        <div class="action__comment">
-            @if($currentUser)
-                <button class="btn__vote__comment" data-vote="up" title="좋아요" {{ $voted }}>
-                    <i class="fa fa-chevron-up"></i> <span>{{ $comment->up_count }}</span>
-                </button>
-                <span> | </span>
-                <button class="btn__vote__comment" data-vote="down" title="싫어요" {{ $voted }}>
-                    <i class="fa fa-chevron-down"></i> <span>{{ $comment->down_count }}</span>
-                </button>
-            @endif
-            {{-- 권한이 있는 사용자만 삭제 수정 버튼 볼 수 있다.--}}
-            @can('update', $comment)
-                <button class="btn__delete__comment">댓글 삭제 </button>
-                <button class="btn__edit__comment"> 댓글 수정 </button>
-            @endcan
+      <div class="action__comment">
+        @if ($currentUser)
+          <button class="btn__vote__comment" data-vote="up" title="{{ trans('forum.comments.like') }}" {{ $voted }}>
+            <i class="fa fa-chevron-up"></i>
+            <span>{{ $comment->up_count }}</span>
+          </button>
 
-            @if($currentUser)
-                <button class="btn__reply__comment">답글 쓰기</button>
-            @endif
-        </div>
+          <span> | </span>
 
-        @if($currentUser)
-            {{-- 댓글 작성 폼에 $parentId 값을 넘김. 숨은 필드로 서버에 전송할 것이다 최상위 댓글을 전송할 때는 이 값이 없다.--}}
-            @include('comments.partial.create', ['parentId' => $comment->id])
+          <button class="btn__vote__comment" data-vote="down" title="{{ trans('forum.comments.dislike') }}" {{ $voted }}>
+            <i class="fa fa-chevron-down"></i> <span>{{ $comment->down_count }}</span>
+          </button>
+          •
         @endif
 
         @can('update', $comment)
-            @include('comments.partial.edit')
+        <button class="btn__delete__comment">{{ trans('forum.comments.destroy') }}</button> •
+        <button class="btn__edit__comment">{{ trans('forum.comments.edit') }}</button> •
         @endcan
 
-        @forelse($comment->replies as $reply)
-            @include('comments.partial.comment', [
-                'comment' => $reply,
-                'isReply' => true,
-            ])
-        @empty
-        @endforelse
+        @if ($currentUser)
+          <button class="btn__reply__comment">
+            {{ trans('forum.comments.reply') }}
+          </button>
+        @endif
+      </div>
+
+      @if($currentUser)
+        @include('comments.partial.create', ['parentId' => $comment->id])
+      @endif
+
+      @forelse ($comment->replies as $reply)
+        @include('comments.partial.comment', [
+          'comment' => $reply,
+          'isReply' => true,
+          'hasChild' => $reply->replies->count(),
+          'isTrashed' => $reply->trashed(),
+        ])
+      @empty
+      @endforelse
     </div>
-</div>
+  </div>
+@else
+  {{--살아 있는 댓글 -> 자신을 출력하고 자식 댓글도 계속 출력--}}
+  <div class="media item__comment {{ $isReply ? 'sub' : 'top' }}" data-id="{{ $comment->id }}" id="comment_{{ $comment->id }}">
+    @include('users.partial.avatar', ['user' => $comment->user, 'size' => 32])
+
+    <div class="media-body">
+      <h5 class="media-heading">
+        <a href="{{ gravatar_profile_url($comment->user->email) }}">
+          {{ $comment->user->name }}
+        </a>
+        <small>
+          {{ $comment->created_at->diffForHumans() }}
+        </small>
+      </h5>
+
+      <div class="content__comment">
+        {!! markdown($comment->content) !!}
+      </div>
+
+      <div class="action__comment">
+        @if($currentUser)
+          <button class="btn__vote__comment" data-vote="up" title="좋아요" {{ $voted }}>
+            <i class="fa fa-chevron-up"></i> <span>{{ $comment->up_count }}</span>
+          </button>
+          <span> | </span>
+          <button class="btn__vote__comment" data-vote="down" title="싫어요" {{ $voted }}>
+            <i class="fa fa-chevron-down"></i> <span>{{ $comment->down_count }}</span>
+          </button>
+        @endif
+        {{-- 권한이 있는 사용자만 삭제 수정 버튼 볼 수 있다.--}}
+        @can('update', $comment)
+        <button class="btn__delete__comment">댓글 삭제 </button>
+        <button class="btn__edit__comment"> 댓글 수정 </button>
+        @endcan
+
+        @if($currentUser)
+          <button class="btn__reply__comment">답글 쓰기</button>
+        @endif
+      </div>
+
+      @if($currentUser)
+        {{-- 댓글 작성 폼에 $parentId 값을 넘김. 숨은 필드로 서버에 전송할 것이다 최상위 댓글을 전송할 때는 이 값이 없다.--}}
+        @include('comments.partial.create', ['parentId' => $comment->id])
+      @endif
+
+      @can('update', $comment)
+      @include('comments.partial.edit')
+      @endcan
+
+      @forelse ($comment->replies as $reply)
+        @include('comments.partial.comment', [
+          'comment' => $reply,
+          'isReply' => true,
+          'hasChild' => $reply->replies->count(),
+          'isTrashed' => $reply->trashed(),
+        ])
+      @empty
+      @endforelse
+
+    </div>
+  </div>
+@endif

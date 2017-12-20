@@ -10,7 +10,7 @@ class EventServiceProvider extends ServiceProvider
     //224p
     // 이벤트 구독자(event subscriber)를 이용하면 하나의 리스터 클래스가 여러 개의 이벤트를 구독하고,
     // 클래스 내부에서 이벤트를 처리 할 수도 있다. $subscribe 에 UserEventListener를 등록함으로써
-    // 이 클래스는 이벤트 리스너임과 동이세 이벤트 구독자가 된다.
+    // 이 클래스는 이벤트 리스너임과 동시에 이벤트 구독자가 된다.
     protected $subscribe = [
         \App\Listeners\UserEventListener::class,
     ];
@@ -29,6 +29,12 @@ class EventServiceProvider extends ServiceProvider
         ],
         \Illuminate\Auth\Events\Login::class => [
           \App\Listeners\UserEventListener::class,
+        ],
+        \App\Events\CommentsEvent::class => [
+            \App\Listeners\CommentsEventListener::class,
+        ],
+        \App\Events\ModelChanged::class => [
+            \App\Listeners\CacheHandler::class,
         ],
     ];
 

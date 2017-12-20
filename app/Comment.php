@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Comment extends Model
 {
+    use \Illuminate\Database\Eloquent\SoftDeletes; // SoftDeletes 트레이트를 사용하겠다고 선언
+    // 모델의 delete() 메서드는 테이블에서 레코드를 삭제하지 않고 deleted_at 필드에 삭제된 시각만 기록 (완전히 삭제하려면 forceDelete())
+
+    protected $dates = ['deleted_at'];
     protected $fillable = ['commentable_type', 'commentable_id', 'user_id', 'parent_id', 'content'];
     protected $with = ['user','votes'];
     protected $appends = ['up_count', 'down_count'];

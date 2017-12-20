@@ -22,8 +22,11 @@
         @include('comments.partial.comment', [
             'parentId' => $comment->id,
             'isReply' => false,
-            ])
+            'hasChild' => $comment->replies->count(),
+            'isTrashed' => $comment->trashed(),
+        ])
          {{--isReply는 최상위 댓글과 자식 댓글을 구분하는 UI 조작을 위한 것.--}}
+         {{--$comment->trashed()는 Comment 모델에서 사용한 SoftDeletes 트페이트에서 볼 수 있다.--}}
     @empty
     @endforelse
 </div>

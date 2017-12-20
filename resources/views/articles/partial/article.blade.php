@@ -11,6 +11,16 @@
         <p class="text-muted meta__article">
             <i class="fa fa-user"></i> {{ $article->user->name }}
             <i class="fa fa-clock-o"></i> {{ $article->created_at->diffForHumans() }}
+
+            <small>
+                / {{ $article->created_at->diffForHumans() }} 에 작성
+                • 조회수 {{ $article->view_count }}
+
+                @if ($article->comment_count > 0)
+                    {{--$article->comment_count 는 접근자로 만든 프로퍼티에 접근(스테이크표기법이나 낙타표기법(commentCount) 모두 사용가능)--}}
+                    • 댓글 {{ $article->comment_count }}
+                @endif
+            </small>
         </p>
 
         @if ($viewName === 'articles.index')

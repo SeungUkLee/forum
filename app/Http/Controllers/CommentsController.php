@@ -20,6 +20,9 @@ class CommentsController extends Controller
         // 라라벨이 $request 인스턴스에 사용자를 이미 주입해 놓았으므로 $request->user()->id 처럼 쓸 수 있다.
         // array_merge : 인자로 받은 배열을 합친다. 배엘에 같은 키가 있으면 나중에 받은 배열의 키 값을 사용
 
+        // 이메일 알림 326p
+        event(new \App\Events\CommentsEvent($comment));
+
         flash()->success('작성하신 댓글을 저장했습니다.');
 
         return redirect(route('articles.show', $article->id).'#comment_'.$comment->id);
@@ -35,7 +38,12 @@ class CommentsController extends Controller
     }
 
     public function destroy(\App\Comment $comment) {
-        $comment->delete();
+        if ($comment->replies()->count() > 0) { // 자식 댓글이 있으므로 소프트 삭제
+            $comment->delete();
+        } else { // 자식 댓글이 없으므로 연결된 투표 모델과 해당 댓글을 테이블에서 완전히 지운다.
+            $comment->votes()->delete();
+            $comment->forceDelete();
+        }
 
         return response()->json([], 204);
     }

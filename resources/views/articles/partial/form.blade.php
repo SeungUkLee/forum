@@ -37,6 +37,17 @@
     {{--</div>--}}
 </div>
 
+
+<div class="form-group">
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" name="notification" value="{{ old('notification', $article->notification) }}">
+            댓글이 작성되면 이메일 알림 받기
+        </label>
+    </div>
+</div>
+
+
 {{--<div class="form-group {{ $errors->has('file') ? 'has-error' : ''}} ">--}}
     {{--<label for="files">파일 </label>--}}
     {{--여러개의 파일을 한 번에 업로드 하기 위해 name=files[] 와 같이 배열형 필드 사용--}}

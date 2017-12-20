@@ -13,7 +13,7 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        Commands\ClearOrphanedAttachments::class, // 고아 첨부 파일 청소
     ];
 
     /**
@@ -26,6 +26,7 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')
         //          ->hourly();
+        $schedule->command('my:coa')->daily();
     }
 
     /**

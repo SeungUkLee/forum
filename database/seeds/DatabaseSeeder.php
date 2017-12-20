@@ -91,6 +91,22 @@ class DatabaseSeeder extends Seeder
 
         $this->command->info('Seeded: attachments table and files');
 
+        /* 고아 첨부 파일 생성 */
+        foreach (range(1, 10) as $index) {
+            $path = $faker->image(attachments_path());
+            $filename = File::basename($path);
+            $bytes = File::size($path);
+            $mime = File::mimeType($path);
+            $this->command->warn("File saved: {$filename}");
+
+            factory(App\Attachment::class)->create([
+                'filename' => $filename,
+                'bytes' => $bytes,
+                'mime' => $mime,
+                'created_at' => $faker->dateTimeBetween('-1 months'), // 한 달 전부터 지금까지의 랜덤 날짜와 시간을 반환
+           ]);
+        }
+
         /* 최상위 댓글 */
         $article->each(function ($article) {
             $article->comments()->save(factory(App\Comment::class)->make());

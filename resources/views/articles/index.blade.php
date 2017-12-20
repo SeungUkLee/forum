@@ -11,12 +11,30 @@
         <a href="{{ route('articles.create') }}" class="btn btn-primary">
             <i class="fa fa-plus-circle"></i> 새 글 쓰기
         </a>
+
+        {{--정렬 UI--}}
+        <div class="btn-group sort__article">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                <i class="fa fa-sort"></i> 목록 정렬 <span class="caret"></span>
+            </button>
+
+            <ul class="dropdown-menu" role="menu">
+                {{--글 목록의 정렬 방식을 선책하는 메뉴를 출력--}}
+                {{--조건식이 참이면 active 클래스 속성을 추가하여 현재 선택한 정렬 조건을 표현--}}
+                @foreach(config('project.sorting') as $column => $text)
+                    <li {!! request()->input('sort') == $column ? 'class="active"' : '' !!}>
+                        {!! link_for_sort($column, $text) !!}
+                    </li>
+                @endforeach
+            </ul>
+        </div>
     </div>
 
 
     <div class="row">
         <div class="col-md-3">
             <aside>
+                @include('articles.partial.search')
                 @include('tags.partial.index')
             </aside>
         </div>
@@ -38,6 +56,5 @@
             @endif
         </div>
     </div>
-
 
 @stop

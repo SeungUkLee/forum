@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
-class ArticlesController extends Controller
+class ArticlesController extends Controller implements Cacheable
 {
     /**
      * Display a listing of the resource.
@@ -14,10 +14,17 @@ class ArticlesController extends Controller
 
     public function __construct()
     {
+        parent::__construct();
         $this->middleware('auth', ['except' => ['index', 'show']]);
     }
 
-    public function index($slug = null)
+    public function cacheTags()
+    {
+        // ArticlesController::index() 메서드가 저장한 여러개의 캐시 레코드는 캐시 키는 달라도 모두 articles라는 캐시 태그를 가진다.
+        return 'articles';
+    }
+
+    public function index(Request $request, $slug = null)
     {
         // 지연로드 104p
 //        $articles = \App\Article::get();
@@ -27,10 +34,25 @@ class ArticlesController extends Controller
         // with()는 엘로퀀드 모델 바로 다음에 위치, 인자는 테이블 이름이 아니라 모델에서 관계를 표현하는 메서드 이름
 //        $articles = \App\Article::latest()->paginate(3);
 //        dd(view('articles.index', compact('articles'))->render());
-
+        $cacheKey = cache_key('articles.show');
+        
         // $slug 변수 값이 있을 때 없을 때의 쿼리를 분리
         $query = $slug ? \App\Tag::whereSlug($slug)->firstOrFail()->articles() : new \App\Article;
-        $articles = $query->latest()->paginate(3);
+
+        $query = $query->orderBy( // oderBy : 정렬
+            $request->input('sort', 'created_at'), // input() : 첫번째 인자값이 없으면 두번째로 대체
+            $request->input('order', 'desc')
+        );
+
+        if($keyword = request()->input('q')) {
+            $raw = 'MATCH(title,content) AGAINST(? IN BOOLEAN MODE)';
+            $query = $query->whereRaw($raw, [$keyword]);
+        }
+
+//        $articles = $query->latest()->paginate(3);
+
+        $articles = $this->cache($cacheKey, 5, $query, 'paginate', 3);
+
         return view('articles.index', compact('articles')); // compact 는 변수와 그 값을 배열로 만들어줌
     }
 
@@ -86,6 +108,11 @@ class ArticlesController extends Controller
 //    }
     // 13.3 폼 리퀘스트 클래스 이용했을 경유 store 메서드
     public function store(\App\Http\Requests\ArticlesRequest $request) {
+        $payload = array_merge($request->all(), [
+            'notification' => $request->has('notification'),
+        ]);
+
+
         // ---- file upload 281p ----//
 //        if($request->hasFile('files')) { // hasFile() 메서드로 files 필드 확인
 //            $files = $request->file('files'); // file() 메서드는 폼 필드로 넘어온 배열 형태의 파일 목록 조회
@@ -117,7 +144,8 @@ class ArticlesController extends Controller
         // Illuminate\Http\Request $request 인스턴스는 로그인한 사용자 정보를 이미 가지고 있다.
         // 뿐만 아니라 auth 미들웨어는 로그인하지 않은 사용자가 이 메서드에 들어오는 것을 막아주므로 널 포인터 예외로부터 안전하다.
 
-        $article = $request->user()->articles()->create($request->all());
+//        $article = $request->user()->articles()->create($request->all());
+        $article = $request->user()->articles()->create($payload);
         if(! $article) {
 
             return back()->with('flash_message', '글이 저장되지 않습니다.')->withInput();
@@ -138,6 +166,9 @@ class ArticlesController extends Controller
 
         // 124p 실용적인 이벤트 시스템
         event(new \App\Events\ArticlesEvent($article));
+
+        event(new \App\Events\ModelChanged('articles'));
+
         flash()->success('글이 저장되었습니다.');
 
         return redirect(route('articles.index'));
@@ -157,8 +188,14 @@ class ArticlesController extends Controller
 
 //        debug($article->toArray());
 
+        $article->view_count += 1;
+        $article->save();
+
         // 댓글 목록 요청 처리 (306p)
-        $comments = $article->comments()->with('replies')->whereNull('parent_id')->latest()->get();
+//        $comments = $article->comments()->with('replies')->whereNull('parent_id')->latest()->get();
+        $comments = $article->comments()->with('replies')->withTrashed()->whereNull('parent_id')->latest()->get();
+        // withTrashed() 체인 : 소프트 삭제된 레코드도 쿼리 결과에 포함.
+
         return view('articles.show', compact('article', 'comments'));
     }
 
@@ -190,7 +227,7 @@ class ArticlesController extends Controller
         $article->tags()->sync($request->input('tags'));
         flash()->success('수정하신 내용을 저장했습니다.');
 
-        return redirect(route('articles.shohw', $article->id));
+        return redirect(route('articles.show', $article->id));
     }
 
     /**
