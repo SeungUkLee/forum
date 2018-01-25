@@ -11898,4 +11898,60 @@ button.close {
   opacity: 0.5;
 }
 
+.form__auth {
+  max-width: 400px;
+  width: 100%;
+  padding: 15px;
+  margin: 0 auto;
+}
+
+.form__auth .checkbox {
+  margin-bottom: 1rem;
+}
+
+.form__auth .checkbox {
+  font-weight: normal;
+}
+
+.form__auth .form-control {
+  position: relative;
+  height: auto;
+  box-sizing: border-box;
+  padding: 0.8rem;
+}
+
+.form__auth .form-control:focus {
+  z-index: 2;
+  border-color: #ccd0d2;
+  box-shadow: none;
+}
+
+.form__auth input {
+  margin-bottom: 10px;
+}
+
+.form__auth .login-or {
+  position: relative;
+  margin-top: 20px;
+  margin-bottom: 20px;
+  padding-top: 15px;
+  padding-bottom: 15px;
+}
+
+.form__auth .span-or {
+  display: block;
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  margin-left: -25px;
+  background-color: #f5f8fa;
+  width: 50px;
+  text-align: center;
+}
+
+.form__auth .hr-or {
+  margin-top: 0px !important;
+  margin-bottom: 0px !important;
+}
+
 /*# sourceMappingURL=app.css.map */

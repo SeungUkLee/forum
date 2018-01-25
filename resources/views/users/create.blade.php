@@ -2,6 +2,15 @@
 
 @section('content')
     <form action="{{ route('users.store') }}" method="post" class="form__auth">
+
+        <div class="page-header">
+            <h4>
+                회원가입
+            </h4>
+            <p class="text-muted">
+                FORUM SERVICE에 오신걸 환영합니다.
+            </p>
+        </div>
         {!! csrf_field() !!}
         <div class="form-group {{ $errors->has('name') ? 'has-error' : '' }}">
             <input type="text" name="name" class="form-control" placeholder="이름" value="{{old('name')}}" autofocus/>
@@ -10,17 +19,17 @@
 
 
         <div class="form-group {{ $errors->has('email') ? 'has-error' : '' }}">
-            <input type="email" name="email" class="form-control" placeholder="{{ trans('auth.form.email') }}" value="{{ old('email') }}"/>
+            <input type="email" name="email" class="form-control" placeholder="이메일" value="{{ old('email') }}"/>
             {!! $errors->first('email', '<span class="form-error">:message</span>') !!}
         </div>
 
         <div class="form-group {{ $errors->has('password') ? 'has-error' : '' }}">
-            <input type="password" name="password" class="form-control" placeholder="{{ trans('auth.form.password') }}"/>
+            <input type="password" name="password" class="form-control" placeholder="비밀번호"/>
             {!! $errors->first('password', '<span class="form-error">:message</span>') !!}
         </div>
 
         <div class="form-group {{ $errors->has('password') ? 'has-error' : '' }}">
-            <input type="password" name="password_confirmation" class="form-control" placeholder="{{ trans('auth.form.password_confirmation') }}" />
+            <input type="password" name="password_confirmation" class="form-control" placeholder="비밀번호 확인" />
             {!! $errors->first('password_confirmation', '<span class="form-error">:message</span>') !!}
         </div>
 
